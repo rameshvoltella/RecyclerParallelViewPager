@@ -1,18 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/white"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+
+            <com.ramz.parallelscroll.views.DelayedRecyclerView
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:id="@+id/delayedRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/cell_height">
+
+            </com.ramz.parallelscroll.views.DelayedRecyclerView>
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/pager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/startSnapRecyclerView"
+            />
+
+        </RelativeLayout>
+
+
 
 </android.support.constraint.ConstraintLayout>

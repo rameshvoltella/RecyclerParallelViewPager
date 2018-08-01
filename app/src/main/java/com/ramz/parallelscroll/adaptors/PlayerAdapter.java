@@ -3,6 +3,7 @@ package com.ramz.parallelscroll.adaptors;
 import android.content.Context;
 
 import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 
 import android.util.TypedValue;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 
 import com.ramz.parallelscroll.R;
 import com.ramz.parallelscroll.util.Constants;
+import com.ramz.parallelscroll.util.ScreenUtil;
 
 /**
  * Created by Ramesh M Nair
@@ -24,16 +26,21 @@ import com.ramz.parallelscroll.util.Constants;
 public class PlayerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Context context;
-    private int mScreenWidth = 0;
+    private int mScreenWidth;
+    private int cellSize;
+
+    private static int TYPE_CELL=1;
+    private static int TYPE_DUMMY=0;
     public PlayerAdapter(Context context,int mScreenWidth) {
         this.context = context;
         this.mScreenWidth = mScreenWidth;
+        cellSize=(int) context.getResources().getDimension(R.dimen.cell_height);
     }
 
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if(viewType==1) {
+        if(viewType==TYPE_CELL) {
 
 
             View view = LayoutInflater.from(context).inflate(R.layout.recyclercell_row, parent, false);
@@ -53,7 +60,8 @@ public class PlayerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             ViewHolder mainHolder= (ViewHolder) holder;
 
             if (position == getCurrentIndicatorPosition()) {
-                mainHolder.playerNameTextView.setTextColor(Color.BLUE);
+                mainHolder.playerNameTextView.setTextColor(ContextCompat.getColor(context,R.color.colorPrimaryDark));
+
             }
             else
             {
@@ -63,7 +71,7 @@ public class PlayerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
             if (mScreenWidth != 0) {
                 RelativeLayout.LayoutParams params =
-                        new RelativeLayout.LayoutParams((mScreenWidth / 5), dp2px(context, 80));
+                        new RelativeLayout.LayoutParams((mScreenWidth / Constants.CELL_VISIBLITY), ScreenUtil.dp2px(context, cellSize));
                 mainHolder.baseCellLayout.setLayoutParams(params);
 
             }
@@ -71,9 +79,8 @@ public class PlayerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
         else if (holder instanceof ViewDummyHolder)
         {
-            LinearLayout.LayoutParams parms = new LinearLayout.LayoutParams((mScreenWidth / 5) * 4, 0);
+            LinearLayout.LayoutParams parms = new LinearLayout.LayoutParams((mScreenWidth / Constants.CELL_VISIBLITY) * 3, 0);
             ((ViewDummyHolder) holder).dummyLayer.setLayoutParams(parms);
-//
         }
     }
 
@@ -82,11 +89,11 @@ public class PlayerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public int getItemViewType(int position) {
         if(position==Constants.playerName.length)
         {
-            return 0;
+            return TYPE_DUMMY;
         }
         else
         {
-            return 1;
+            return TYPE_CELL;
         }
     }
 
@@ -117,10 +124,7 @@ public class PlayerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
 
     }
-    public static int dp2px(Context context, float dpVal) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                dpVal, context.getResources().getDisplayMetrics());
-    }
+
 
     public void setCurrentActivrPosition(int indicatorPosition) {
         mIndicatorPosition = indicatorPosition;

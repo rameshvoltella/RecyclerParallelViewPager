@@ -26,8 +26,22 @@
             android:id="@+id/pager"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/startSnapRecyclerView"
+            android:layout_below="@+id/delayedRecyclerView"
             />
+
+        <RelativeLayout
+            android:id="@+id/picker_indicator_layout"
+            android:layout_width="@dimen/cell_height"
+            android:layout_height="@dimen/cell_height">
+
+            <ImageView
+                android:layout_width="13dp"
+                android:layout_height="10dp"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="5dp"
+                android:src="@mipmap/ic_launcher" />
+        </RelativeLayout>
 
         </RelativeLayout>
 

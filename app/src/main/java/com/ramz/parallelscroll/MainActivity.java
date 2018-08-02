@@ -9,10 +9,13 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.ramz.parallelscroll.adaptors.PlayerAdapter;
 import com.ramz.parallelscroll.adaptors.PlayerFragmentAdapter;
 import com.ramz.parallelscroll.util.Constants;
+import com.ramz.parallelscroll.util.RecyclerItemClickListener;
+import com.ramz.parallelscroll.util.ScreenUtil;
 import com.ramz.parallelscroll.util.StartSnapHelper;
 import com.ramz.parallelscroll.views.DelayedRecyclerView;
 
@@ -27,21 +30,22 @@ public class MainActivity extends AppCompatActivity {
     ViewPager pager;
     StartSnapHelper snapHelperStart;
     PlayerAdapter adaptor;
+
     int lastPosition=0;
     boolean isScrolling=false;
-    protected boolean mScrollEanbled = false;
+    protected boolean mScrollEnabled = false;
     int mItemWidth = 1;
 
     LinearLayoutManager layoutManagerStart;
 
-    RelativeLayout pickerIndicator;
+    RelativeLayout pickerIndicatorLayout;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         delayedRecyclerView=(DelayedRecyclerView)findViewById(R.id.delayedRecyclerView);
-        pickerIndicator=(RelativeLayout)findViewById(R.id.picker_indicator_layout);
+        pickerIndicatorLayout=(RelativeLayout)findViewById(R.id.picker_indicator_layout);
         pager=(ViewPager)findViewById(R.id.pager);
 
         layoutManagerStart=new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
@@ -50,14 +54,62 @@ public class MainActivity extends AppCompatActivity {
         adaptor= new PlayerAdapter(getApplicationContext(),getWindow().getWindowManager().getDefaultDisplay().getWidth());
         delayedRecyclerView.setAdapter(adaptor);
         pager.setAdapter(new PlayerFragmentAdapter(getSupportFragmentManager()));
-        pager.setClipToPadding(false);
-        // set padding manually, the more you set the padding the more you see of prev & next page
-        pager.setPadding(60, 0, 60, 0);
-        // sets a margin b/w individual pages to ensure that there is a gap b/w them
-        pager.setPageMargin(20);
+
+        /*Snap helper help you snap the selected item to the Start*/
 
         snapHelperStart=  new StartSnapHelper();
         snapHelperStart.attachToRecyclerView(delayedRecyclerView);
+
+        /*Making the indicator layout same as the width of one cell*/
+
+        RelativeLayout.LayoutParams params =
+                new RelativeLayout.LayoutParams((getWindow().getWindowManager().getDefaultDisplay().getWidth() / Constants.CELL_VISIBLITY), RelativeLayout.LayoutParams.MATCH_PARENT);
+        pickerIndicatorLayout.setLayoutParams(params);
+
+
+        /*Click listener*/
+        delayedRecyclerView.addOnItemTouchListener(
+                new RecyclerItemClickListener(getApplicationContext(), delayedRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, final int position) {
+                        mScrollEnabled=true;
+                        lastPosition=position;
+
+                        delayedRecyclerView.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                View view = layoutManagerStart.findViewByPosition(position);
+
+
+                                if (view == null) {
+                                    Log.e("error", "Cant find target View for initial Snap");
+                                    return;
+                                }
+
+                                int[] snapDistance = snapHelperStart.calculateDistanceToFinalSnap(layoutManagerStart, view);
+                                if (snapDistance[0] != 0 || snapDistance[1] != 0) {
+
+                                    /*will scroll to selected postion and snap it on the 1st item*/
+                                    delayedRecyclerView.scrollBy(snapDistance[0], snapDistance[1]);
+                                    pager.setCurrentItem(position);
+                                    adaptor.setCurrentActivrPosition(lastPosition);
+                                    adaptor.notifyDataSetChanged();
+
+                                }
+
+
+
+                            }
+                        });
+
+                    }
+
+                    @Override
+                    public void onItemLongClick(View view, int position) {
+                        Toast.makeText(getApplicationContext(),Constants.playerName[position],Toast.LENGTH_LONG).show();
+                    }
+                })
+        );
 
 
         delayedRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -65,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
+
                 if(newState==RecyclerView.SCROLL_STATE_DRAGGING)
                 {
                     adaptor.setCurrentActivrPosition(lastPosition);
@@ -72,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
 
+                /*When scroll is about to stop we find the snap position and set current viewpager based on the position*/
                 if(newState == RecyclerView.SCROLL_STATE_IDLE) {
 
                     View centerView = snapHelperStart.findSnapView(layoutManagerStart);
@@ -79,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
                     {
                         if(lastPosition!=(Constants.playerName.length-1)) {
                             lastPosition = Constants.playerName.length - 1;
-                            mScrollEanbled=true;
+                            mScrollEnabled =true;
 
 
                             pager.setCurrentItem(lastPosition);
@@ -98,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
                         if(lastPosition!=pos) {
                             lastPosition = pos;
 
-                            mScrollEanbled=true;
+                            mScrollEnabled =true;
 
                             pager.setCurrentItem(lastPosition);
 
@@ -112,7 +166,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                     adaptor.setCurrentActivrPosition(lastPosition);
                     adaptor.notifyDataSetChanged();
-//                    mPager.setPagingEnabled(true);
 
                 }
             }
@@ -124,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-                if (!mScrollEanbled) {
+                if (!mScrollEnabled) {
 
                     scrollToTab(position, positionOffset);
                 }
@@ -142,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
             public void onPageScrollStateChanged(int state) {
 
                 if (state == ViewPager.SCROLL_STATE_IDLE) {
-                    mScrollEanbled=false;
+                    mScrollEnabled =false;
                     isScrolling=false;
 
 
@@ -153,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
                 else if(state==ViewPager.SCROLL_STATE_DRAGGING)
                 {
                     isScrolling=true;
-                    mScrollEanbled=false;
+                    mScrollEnabled =false;
 
 
                 }
@@ -185,8 +238,6 @@ public class MainActivity extends AppCompatActivity {
         View selectedView = layoutManagerStart.findViewByPosition(position);
         View nextView = layoutManagerStart.findViewByPosition(position + 1);
 
-        // if(position dummy.size())
-
 
         if (nextView != null) {
             if (selectedView != null) {
@@ -199,11 +250,6 @@ public class MainActivity extends AppCompatActivity {
                 scrollOffset = (int) (sLeft - dx);
             } else {
                 scrollOffset = (mItemWidth/2) * (-1);
-                //mRequestScrollToTab = true;
-            }
-
-            if (position != 0) {
-                // scrollOffset=scrollOffset-10;
             }
 
             mIndicatorPosition = position;

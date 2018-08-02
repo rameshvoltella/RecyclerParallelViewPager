@@ -6,11 +6,15 @@
     android:background="@android:color/white"
     tools:context=".MainActivity">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         >
-
+<RelativeLayout
+    android:layout_width="wrap_content"
+    android:layout_height="@dimen/cell_height"
+    >
 
             <com.ramz.parallelscroll.views.DelayedRecyclerView
                 android:clickable="true"
@@ -21,18 +25,10 @@
                 android:layout_height="@dimen/cell_height">
 
             </com.ramz.parallelscroll.views.DelayedRecyclerView>
-
-        <android.support.v4.view.ViewPager
-            android:id="@+id/pager"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/delayedRecyclerView"
-            />
-
         <RelativeLayout
             android:id="@+id/picker_indicator_layout"
-            android:layout_width="@dimen/cell_height"
-            android:layout_height="@dimen/cell_height">
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
 
             <ImageView
                 android:layout_width="13dp"
@@ -42,8 +38,18 @@
                 android:layout_marginBottom="5dp"
                 android:src="@mipmap/ic_launcher" />
         </RelativeLayout>
+</RelativeLayout>
 
-        </RelativeLayout>
+        <android.support.v4.view.ViewPager
+            android:id="@+id/pager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/delayedRecyclerView"
+            />
+
+
+
+        </LinearLayout>
 
 
 
